@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game</title>
+<style>
+  body {background: #222; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: Arial; color: white;}
+  canvas {background: white; border: 3px solid #0f0;}
+  h1 {color: #0f0; margin: 10px;}
+  p {color: #aaa;}
+</style>
+</head>
+<body>
+  <h1>Snake Game</h1>
+  <canvas id="game" width="400" height="400"></canvas>
+  <p>Swipe to move</p>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const grid = 20;
+let snake = [{x: 100, y: 100}];
+let dx = grid;
+let dy = 0;
+let food = {x: 200, y: 200};
+let score = 0;
+
+function draw() {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, 400, 400);
+  ctx.fillStyle = 'green';
+  snake.forEach(part => ctx.fillRect(part.x, part.y, grid, grid));
+  ctx.fillStyle = 'red';
+  ctx.fillRect(food.x, food.y, grid, grid);
+}
+
+function update() {
+  let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+  if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
+    alert('Game Over! Score: ' + score);
+    snake = [{x: 100, y: 100}];
+    dx = grid; dy = 0; score = 0;
+  }
+  snake.unshift(head);
+  if(head.x === food.x && head.y === food.y) {
+    score++;
+    food = {x: Math.floor(Math.random() * 20) * grid, y: Math.floor(Math.random() * 20) * grid};
+  } else {
+    snake.pop();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft' && dx === 0) {dx = -grid; dy = 0;}
+  if(e.key === 'ArrowRight' && dx === 0) {dx = grid; dy = 0;}
+  if(e.key === 'ArrowUp' && dy === 0) {dx = 0; dy = -grid;}
+  if(e.key === 'ArrowDown' && dy === 0) {dx = 0; dy = grid;}
+});
+
+let touchStartX = 0, touchStartY = 0;
+canvas.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+canvas.addEventListener('touchend', e => {
+  let dxTouch = e.changedTouches[0].clientX - touchStartX;
+  let dyTouch = e.changedTouches[0].clientY - touchStartY;
+  if(Math.abs(dxTouch) > Math.abs(dyTouch)) {
+    if(dxTouch > 0 && dx === 0) {dx = grid; dy = 0;}
+    if(dxTouch < 0 && dx === 0) {dx = -grid; dy = 0;}
+  } else {
+    if(dyTouch > 0 && dy === 0) {dx = 0; dy = grid;}
+    if(dyTouch < 0 && dy === 0) {dx = 0; dy = -grid;}
+  }
+});
+
+setInterval(() => {update(); draw();}, 100);
+</script>
+</body>
+</html>
